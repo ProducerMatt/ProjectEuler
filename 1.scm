@@ -35,3 +35,23 @@
   (newline)
   (display (solution3 1000))
   (newline))
+
+(define reps 100000)
+(load "Matt.scm")
+(define (bench)
+  (echo "solution:"
+        (cadr (mattbench2 (λ()
+                            (solution 1000))
+                          reps)))
+  (echo "solution2:"
+        (cadr (mattbench2 (λ()
+                            (solution2 1000))
+                          reps)))
+  (echo "solution3:"
+        (cadr (mattbench2 (λ()
+                            (solution3 1000))
+                          reps))))
+
+;; solution: 239776.73923
+;; solution2: 67562.9544
+;; solution3: 24972.63739
