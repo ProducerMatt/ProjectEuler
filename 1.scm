@@ -1,4 +1,4 @@
-(define (problem x)
+(define (solution x)
   (apply +
          (filter (λ (x) (or (= 0 (remainder x 3))
                             (= 0 (remainder x 5))))
@@ -6,7 +6,7 @@
                       (cdr (iota (- x 1)))))))
 
 
-(define (problem2 x)
+(define (solution2 x)
   (define ll '())
   (define (iter i)
     (if (= i 1)
@@ -18,7 +18,7 @@
 
   (iter (- x 1))) ;; Why doesn't append! work?
 
-(define (problem3 x)
+(define (solution3 x)
   (define (iter i n)
     (cond ((= i 1) n)
           ((or (= 0 (modulo i 3))
@@ -29,9 +29,9 @@
   (iter (- x 1) 0))
 
 (define (matt-test)
-  (display (problem 1000))
+  (display (solution 1000))
   (newline)
-  (display (problem2 1000))
+  (display (solution2 1000))
   (newline)
-  (display (problem3 1000))
+  (display (solution3 1000))
   (newline))
