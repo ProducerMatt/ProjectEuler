@@ -7,16 +7,16 @@
 
 
 (define (solution2 x)
-  (define ll '())
-  (define (iter i)
+  (define (iter i ll)
     (if (= i 1)
         (apply + ll)
-        (begin (cond ((or (= 0 (modulo i 3))
-                          (= 0 (modulo i 5)))
-                      (set! ll (append ll i))))
-               (iter (- i 1)))))
+        (cond ((or (= 0 (modulo i 3))
+                   (= 0 (modulo i 5)))
+               (iter (- i 1)
+                     (cons i ll)))
+              (else (iter (- i 1) ll)))))
 
-  (iter (- x 1))) ;; Why doesn't append! work?
+  (iter (- x 1) '()))
 
 (define (solution3 x)
   (define (iter i n)
