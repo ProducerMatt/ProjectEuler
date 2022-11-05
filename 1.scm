@@ -13,7 +13,7 @@
         (apply + ll)
         (begin (cond ((or (= 0 (modulo i 3))
                           (= 0 (modulo i 5)))
-                      (append ll i)))
+                      (set! ll (append ll i))))
                (iter (- i 1)))))
 
   (iter (- x 1))) ;; Why doesn't append! work?
@@ -33,5 +33,5 @@
   (newline)
   (display (problem2 1000))
   (newline)
-  (display (problem2 1000))
+  (display (problem3 1000))
   (newline))
