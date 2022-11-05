@@ -55,3 +55,6 @@
 ;; solution: 239776.73923
 ;; solution2: 67562.9544
 ;; solution3: 24972.63739
+
+;; Solution 3's simple iterative solution far outpaces the competition,
+;; especially the high-abstraction model used in solution 1.
