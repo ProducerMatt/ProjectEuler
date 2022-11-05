@@ -50,3 +50,14 @@
 
   (list (iter n) ;; result of last call of f
         (/ (how-long) (* n 1.0))));; Divide by iterations so changed n has no effect
+
+;; ECHO -- ez printing
+(use-modules (ice-9 format))
+(define (stringit . args)
+  (string-append
+   (apply string-append
+    (map (λ(x)
+          (format #f "~a " x))
+        args))))
+(define (echo . args)
+  (format #t "~&~a~%" (apply stringit args)))
