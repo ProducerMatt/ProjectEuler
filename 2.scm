@@ -1,21 +1,14 @@
-;; fib list+target
-(define (fib-lt target)
-  (define (iter l)
-    (if (>= (car l) target)
-        (cdr l)
-        (iter (cons
-               (+ (cadr l)
-                  (car l))
-               l))))
-  (iter '(2 1)))
-
-(define (consider l)
-  (define (iter i ll)
-    (if (< (length ll) 2)
-        i
-        (iter (+ i (car ll))
-              (cddr ll))))
-  (iter 0
-        (if (even? (length l))
-            (cdr l)
-            l)))
+(define (solution target)
+  (define (iter i x y sum)
+    (cond ((>= x target) sum)
+          ((even? x)
+           (iter (1+ i)
+                 (+ x y)
+                 x
+                 (+ x sum)))
+          (else
+           (iter (1+ i)
+                 (+ x y)
+                 x
+                 sum))))
+  (iter 2 2 1 2))
