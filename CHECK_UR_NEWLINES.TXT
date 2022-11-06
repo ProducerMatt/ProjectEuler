@@ -1,0 +1,6 @@
+When testing answers, use flag -n
+
+~> echo answer | md5sum
+ba05a5b4d1c90e69b6da7da8b50a5c26  -
+~> echo -n answer | md5sum
+a363b8d13575101a0226e8d0d054f2e7  -
