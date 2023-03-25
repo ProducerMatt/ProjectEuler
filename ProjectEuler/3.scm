@@ -3,13 +3,17 @@
 (define (get-answer) (last-pair (factor-tree-rec 600851475143)))
 (define (factor-tree x)
   (define half-x (truncate (/ x 2)))
+  (define ii 100)
   ;; take a number, return a list of prime factors
   (reverse!
    (let iter ((low 2)
               (ll '()))
      (let* ((nl (cons low ll))
             (try (apply * nl)))
-       (cond ((> try x)
+     (if (= ii 0)
+         nl
+       (begin (set! ii (1- ii))
+              (cond ((> try x)
               (if (> low half-x)
                   (let ((last-good (car ll)))
                     (iter (find-next-prime last-good)
@@ -18,7 +22,7 @@
                         ll)))
              ((= try x) nl)
              ((< try x)
-              (iter low nl)))))))
+              (iter low nl)))))))))
 (define (factor-tree-rec x)
    (let rec ((x x))
      (let ((divisor (smallest-divisor x)))

@@ -44,14 +44,14 @@
 (define (BruteForce plaintext-temp desiredCipher-temp)
   (define plaintext (string-upcase plaintext-temp))
   (define desiredCipher (string-upcase desiredCipher-temp))
-  (define char1
+  (define known-char
     (let recurse ((i 0)
                   (l (string-length desiredCipher)))
-      (case ((not (char=? (string-ref plaintext i)
+      (cond ((not (char=? (string-ref plaintext i)
                           (string-ref desiredCipher i)))
              (string-ref desiredCipher i))
-        ((< i l) (recurse (1+ i) l))
-        (else #f))))
+            ((< i l) (recurse (1+ i) l))
+            (else #f))))
   (define allchars (char-set->list
                     (char-set-intersection char-set:upper-case
                                            (char-set-difference (string->char-set plaintext)
@@ -60,19 +60,28 @@
     (map proc allchars))
   (let* ((result
           (cmap
-           (lambda(char2)
-             (if (eqv? char1 char2)
-                 (list 'skip char2)
-                 (cmap
-                  (lambda(char3)
-                    (if (or (eqv? char1 char3)
-                            (eqv? char2 char3))
-                        (list 'skip char3)
-                        (let* ((this-key (list->string (list char1 char2 char3)))
-                               (attempt (BrokenKeyboard this-key plaintext)))
-                          (if (string=? attempt desiredCipher)
-                              (error "Key found! " this-key)
-                              (list 'not-found this-key)))))))))))
+           (lambda(char1)
+             (cmap
+              (lambda(char2)
+                (if (eqv? char1 char2)
+                    (list 'skip char2)
+                    (cmap
+                     (lambda(char3)
+                       (cond ((or (eqv? char1 char3)
+                                  (eqv? char2 char3))
+                              (list 'skip-dupe char3))
+                             ((not (find (lambda(c)(eqv? c known-char))
+                                         (list char1 char2 char3)))
+                              (list 'skip-no-known-char
+                                    (list char1 char2 char3)))
+                             (else
+                              (let* ((this-key (list->string
+                                                (list char1 char2 char3)))
+                                     (attempt (BrokenKeyboard
+                                               this-key plaintext)))
+                                (if (string=? attempt desiredCipher)
+                                    (error "Key found! " this-key)
+                                    (list 'not-found this-key))))))))))))))
     (with-output-to-file "./error-dump.txt"
       (lambda()
         (write result)))
