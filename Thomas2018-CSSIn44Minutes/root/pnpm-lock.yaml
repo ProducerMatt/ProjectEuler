@@ -1,0 +1,13 @@
+lockfileVersion: 5.4
+
+specifiers:
+  minireset.css: ^0.0.7
+
+dependencies:
+  minireset.css: 0.0.7
+
+packages:
+
+  /minireset.css/0.0.7:
+    resolution: {integrity: sha512-raWKK2aHP/MI4Yu72dU6hade1YFuoyDQtSUi/FiIZfeRHjgL81uN/nFvG2aoAr+mseRc3jpg47jQqx1/+6w+kQ==}
+    dev: false
