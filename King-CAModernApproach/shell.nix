@@ -1,12 +1,15 @@
 { pkgs, ...  }:
 let
+  stdenv = pkgs.clang15Stdenv;
   mkShell = pkgs.mkShell.override {
-    stdenv = pkgs.llvmPackages_latest.stdenv;
+    inherit stdenv;
   };
 in
 mkShell {
-  buildInputs = with pkgs; with llvmPackages_latest; [
-    stdenv (gdb.override { enableDebuginfod = true; })
+  buildInputs = with pkgs; [
+    stdenv
+    (gdb.override { enableDebuginfod = true; })
+    musl
   ];
   # buildInputs is for dependencies you'd need "at run time",
   # were you to to use nix-build not nix-shell and build whatever you were working on

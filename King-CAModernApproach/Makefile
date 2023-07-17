@@ -9,9 +9,9 @@ OUT := ./o
 EXE := $(patsubst ./src/%.c, $(OUT)/%, $(SRC))
 
 # Define the compiler and flags
-CC := clang
+CC := musl-clang
 TASTYPIE= -fPIE -Wl,-pie -fPIC -Wl,-shared
-CFLAGS = -std=c99 -O1 -g -Weverything -Wframe-larger-than=64000 -fsanitize=address -fsanitize=undefined -fsanitize=leak -Wformat=2 -fstack-protector-strong -fno-omit-frame-pointer -Wl,-z,nodlopen -Wl,-z,nodump -Wl,-z,relro -Wl,-z,now
+CFLAGS = -std=c99 -O1 -g -Weverything -Wframe-larger-than=64000 -Wformat=2 -fstack-protector-strong -fno-omit-frame-pointer -Wl,-z,nodlopen -Wl,-z,nodump -Wl,-z,relro -Wl,-z,now -fsanitize=address -fsanitize=undefined -fsanitize=leak
 
 # Default target
 all: $(EXE)
