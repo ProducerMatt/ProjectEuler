@@ -6,7 +6,7 @@ let
   };
 in
 mkShell {
-  buildInputs = with pkgs; [
+  packages = with pkgs; [
     stdenv
     (gdb.override { enableDebuginfod = true; })
     musl
