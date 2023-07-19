@@ -1,17 +1,4 @@
 defmodule TodoList do
-  @moduledoc """
-  Documentation for `SimpleTodo`.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-  iex> SimpleTodo.hello()
-  :world
-
-  """
   defstruct next_id: 1, entries: %{}
   def new(entries \\ []) do
     Enum.reduce(
@@ -40,7 +27,6 @@ defmodule TodoList do
 end
 
 defmodule TodoList.CsvImporter do
-
   defp file_stream(path) do
     File.stream!(path)
     |> Stream.map(&String.trim_trailing(&1, "\n"))
@@ -52,7 +38,7 @@ defmodule TodoList.CsvImporter do
     |> Stream.map(fn l ->
       [ dateString, title ] = l
       case Date.from_iso8601(dateString) do
-	      {:ok, date} -> %{date: date, title: title}
+        {:ok, date} -> %{date: date, title: title}
         other -> throw("bad css]v: #{dateString} -> #{other}")
       end
     end)
