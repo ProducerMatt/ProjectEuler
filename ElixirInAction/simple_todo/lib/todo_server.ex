@@ -18,6 +18,9 @@ defmodule TodoServer do
   def add_entry(todo_server, new_entry) do
     send(todo_server, {:add_entry, new_entry})
   end
+  def update_entry(todo_server, id, entry) do
+    send(todo_server, {:update_entry, id, entry})
+  end
   def entries(todo_server, date) do
     send(todo_server, {:entries, self(), date})
     receive do
@@ -28,6 +31,9 @@ defmodule TodoServer do
   end
   defp process_message(todo_list, {:add_entry, new_entry}) do
     TodoList.add_entry(todo_list, new_entry)
+  end
+  defp process_message(todo_list, {:update_entry, id, entry}) do
+    TodoList.update_entry(todo_list, id, entry)
   end
   defp process_message(todo_list, {:entries, caller, date}) do
     send(caller, {:todo_entries, TodoList.entries(todo_list, date)})   #1

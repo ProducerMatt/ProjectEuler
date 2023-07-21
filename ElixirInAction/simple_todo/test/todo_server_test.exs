@@ -28,4 +28,14 @@ defmodule TodoServerTest do
     ]
     assert expected == TodoServer.entries(pid, ~D[2023-12-19])
   end
+  test "TodoList.update_entry" do
+    entries = Map.values(@knownGoodList.entries)
+    pid = TodoServer.start(entries)
+    id = 1
+    to_update = %{title: "Flossing"}
+    TodoServer.update_entry(pid, id, to_update)
+    new_list = TodoServer.entries(pid, ~D[2023-12-19])
+    added_entry = Map.merge(@knownGoodList.entries[id], to_update)
+    assert List.first(new_list) == added_entry
+  end
 end
