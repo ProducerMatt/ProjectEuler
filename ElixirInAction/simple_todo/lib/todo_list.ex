@@ -1,5 +1,6 @@
 defmodule TodoList do
-  defstruct next_id: 1, entries: %{}
+  defstruct [next_id: 1, entries: %{}]
+  @type t :: %__MODULE__{next_id: integer, entries: map}
   def new(entries \\ []) do
     Enum.reduce(
       entries,
@@ -7,6 +8,7 @@ defmodule TodoList do
       &add_entry(&2, &1)
     )
   end
+  @spec add_entry(TodoList.t, map) :: TodoList.t
   def add_entry(todo_list, entry) do
     entry = Map.put(entry, :id, todo_list.next_id)
     new_entries = Map.put(
@@ -19,6 +21,7 @@ defmodule TodoList do
               next_id: todo_list.next_id + 1
     }
   end
+  @spec entries(TodoList.t, Date) :: list
   def entries(todo_list, date) do
     todo_list.entries
     |> Map.values()
@@ -27,6 +30,7 @@ defmodule TodoList do
 end
 
 defmodule TodoList.CsvImporter do
+
   defp file_stream(path) do
     File.stream!(path)
     |> Stream.map(&String.trim_trailing(&1, "\n"))
