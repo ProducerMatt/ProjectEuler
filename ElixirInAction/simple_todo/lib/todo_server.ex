@@ -1,10 +1,20 @@
 defmodule TodoServer do
-  @spec start :: pid
-  def start do
-    spawn(fn -> loop(TodoList.new()) end)
+
+  @spec start(atom() | list()) :: pid
+  def start(entries \\ nil) do
+    pid = spawn(fn ->
+      cond do
+	      Kernel.is_list(entries) ->
+          loop(TodoList.new(entries))
+        is_nil(entries) ->
+          loop(TodoList.new())
+      end
+    end)
+    Process.register(pid, :todo_server)
+    pid
   end
-  def start(entries) do
-    spawn(fn -> loop(TodoList.new(entries)) end)
+  def stop do
+    Process.exit(Process.whereis(:todo_server), :kill)
   end
 
   defp loop(todo_list) do
@@ -15,17 +25,17 @@ defmodule TodoServer do
     loop(new_todo_list)
   end
 
-  def add_entry(todo_server, new_entry) do
-    send(todo_server, {:add_entry, new_entry})
+  def add_entry(new_entry) do
+    send(:todo_server, {:add_entry, new_entry})
   end
-  def update_entry(todo_server, id, entry) do
-    send(todo_server, {:update_entry, id, entry})
+  def update_entry(id, entry) do
+    send(:todo_server, {:update_entry, id, entry})
   end
-  def delete_entry(todo_server, id) do
-    send(todo_server, {:delete_entry, id})
+  def delete_entry(id) do
+    send(:todo_server, {:delete_entry, id})
   end
-  def entries(todo_server, date) do
-    send(todo_server, {:entries, self(), date})
+  def entries(date) do
+    send(:todo_server, {:entries, self(), date})
     receive do
       {:todo_entries, entries} -> entries
     after
@@ -42,7 +52,7 @@ defmodule TodoServer do
     TodoList.update_entry(todo_list, id, entry)
   end
   defp process_message(todo_list, {:entries, caller, date}) do
-    send(caller, {:todo_entries, TodoList.entries(todo_list, date)})   #1
-    todo_list              #2
+    send(caller, {:todo_entries, TodoList.entries(todo_list, date)})
+    todo_list
   end
 end
