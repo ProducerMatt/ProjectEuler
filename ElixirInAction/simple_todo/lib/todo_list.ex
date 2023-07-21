@@ -33,6 +33,10 @@ defmodule TodoList do
     |> Map.values()
     |> Enum.filter(fn entry -> entry.date == date end)
   end
+  def delete_entry(todo_list, id) do
+    new_entries = Map.delete(todo_list.entries, id)
+    Map.put(todo_list, :entries, new_entries)
+  end
 end
 
 defmodule TodoList.CsvImporter do

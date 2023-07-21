@@ -38,4 +38,10 @@ defmodule TodoServerTest do
     added_entry = Map.merge(@knownGoodList.entries[id], to_update)
     assert List.first(new_list) == added_entry
   end
+  test "TodoList.delete_entry" do
+    entries = Map.values(@knownGoodList.entries)
+    pid = TodoServer.start(entries)
+    TodoServer.delete_entry(pid, 3)
+    assert TodoServer.entries(pid, @knownGoodList.entries[1].date) == [@knownGoodList.entries[1]]
+  end
 end

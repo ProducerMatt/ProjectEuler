@@ -42,4 +42,11 @@ defmodule SimpleTodoTest do
     assert new_list.entries[1] == added_entry
     assert new_list.next_id == 4
   end
+  test "TodoList.delete_entry" do
+    new_list = TodoList.delete_entry(@knownGoodList, 1)
+    expected = [
+      @knownGoodList.entries[3]
+    ]
+    assert expected == TodoList.entries(new_list, ~D[2023-12-19])
+  end
 end

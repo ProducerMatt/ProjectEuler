@@ -21,6 +21,9 @@ defmodule TodoServer do
   def update_entry(todo_server, id, entry) do
     send(todo_server, {:update_entry, id, entry})
   end
+  def delete_entry(todo_server, id) do
+    send(todo_server, {:delete_entry, id})
+  end
   def entries(todo_server, date) do
     send(todo_server, {:entries, self(), date})
     receive do
@@ -28,6 +31,9 @@ defmodule TodoServer do
     after
       5000 -> {:error, :timeout}
     end
+  end
+  defp process_message(todo_list, {:delete_entry, id}) do
+    TodoList.delete_entry(todo_list, id)
   end
   defp process_message(todo_list, {:add_entry, new_entry}) do
     TodoList.add_entry(todo_list, new_entry)
