@@ -1,14 +1,14 @@
-defmodule TodoList do
+defmodule Todo.List do
   defstruct [next_id: 1, entries: %{}]
   @type t :: %__MODULE__{next_id: integer, entries: map}
   def new(entries \\ []) do
     Enum.reduce(
       entries,
-      %TodoList{},
+      %Todo.List{},
       &add_entry(&2, &1)
     )
   end
-  @spec add_entry(TodoList.t, map) :: TodoList.t
+  @spec add_entry(Todo.List.t, map) :: Todo.List.t
   def add_entry(todo_list, entry) do
     entry = Map.put(entry, :id, todo_list.next_id)
     new_entries = Map.put(
@@ -16,18 +16,18 @@ defmodule TodoList do
       todo_list.next_id,
       entry
     )
-    %TodoList{todo_list |
+    %Todo.List{todo_list |
               entries: new_entries,
               next_id: todo_list.next_id + 1
     }
   end
-  @spec update_entry(TodoList.t, integer, map) :: TodoList.t
+  @spec update_entry(Todo.List.t, integer, map) :: Todo.List.t
   def update_entry(todo_list, id, entry) do
     updated = Map.merge(todo_list.entries[id], entry)
     new_entries = Map.put(todo_list.entries, id, updated)
     Map.put(todo_list, :entries, new_entries)
   end
-  @spec entries(TodoList.t, Date) :: list
+  @spec entries(Todo.List.t, Date) :: list
   def entries(todo_list, date) do
     todo_list.entries
     |> Map.values()
@@ -39,7 +39,7 @@ defmodule TodoList do
   end
 end
 
-defmodule TodoList.CsvImporter do
+defmodule Todo.List.CsvImporter do
 
   defp file_stream(path) do
     File.stream!(path)
@@ -56,6 +56,6 @@ defmodule TodoList.CsvImporter do
         other -> throw("bad css]v: #{dateString} -> #{other}")
       end
     end)
-    |> TodoList.new()
+    |> Todo.List.new()
   end
 end

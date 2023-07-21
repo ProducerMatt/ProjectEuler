@@ -1,4 +1,4 @@
-defmodule TodoServer do
+defmodule Todo.Server do
   use GenServer
 
   @spec start(atom() | list()) :: pid
@@ -15,45 +15,45 @@ defmodule TodoServer do
     {:ok,
      cond do
        is_list(entries) ->
-         TodoList.new(entries)
+         Todo.List.new(entries)
        is_nil(entries) ->
-         TodoList.new()
+         Todo.List.new()
      end
     }
   end
   @spec stop :: :ok
   def stop do
-    GenServer.stop(TodoServer, :normal)
+    GenServer.stop(__MODULE__, :normal)
   end
 
   @impl GenServer
   def handle_call(request, _from, todo_list) do
     case request do
       {:entries, date} ->
-        {:reply, TodoList.entries(todo_list, date), todo_list}
+        {:reply, Todo.List.entries(todo_list, date), todo_list}
     end
   end
   @impl GenServer
   def handle_cast(request, todo_list) do
     case request do
       {:add_entry, new_entry} ->
-        {:noreply, TodoList.add_entry(todo_list, new_entry)}
+        {:noreply, Todo.List.add_entry(todo_list, new_entry)}
       {:update_entry, id, entry} ->
-        {:noreply, TodoList.update_entry(todo_list, id, entry)}
+        {:noreply, Todo.List.update_entry(todo_list, id, entry)}
       {:delete_entry, id} ->
-        {:noreply, TodoList.delete_entry(todo_list, id)}
+        {:noreply, Todo.List.delete_entry(todo_list, id)}
     end
   end
   def add_entry(new_entry) do
-    GenServer.cast(TodoServer, {:add_entry, new_entry})
+    GenServer.cast(__MODULE__, {:add_entry, new_entry})
   end
   def update_entry(id, entry) do
-    GenServer.cast(TodoServer, {:update_entry, id, entry})
+    GenServer.cast(__MODULE__, {:update_entry, id, entry})
   end
   def delete_entry(id) do
-    GenServer.cast(TodoServer, {:delete_entry, id})
+    GenServer.cast(__MODULE__, {:delete_entry, id})
   end
   def entries(date) do
-    GenServer.call(TodoServer, {:entries, date})
+    GenServer.call(__MODULE__, {:entries, date})
   end
 end
