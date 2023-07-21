@@ -21,6 +21,12 @@ defmodule TodoList do
               next_id: todo_list.next_id + 1
     }
   end
+  @spec update_entry(TodoList.t, integer, map) :: TodoList.t
+  def update_entry(todo_list, id, entry) do
+    updated = Map.merge(todo_list.entries[id], entry)
+    new_entries = Map.put(todo_list.entries, id, updated)
+    Map.put(todo_list, :entries, new_entries)
+  end
   @spec entries(TodoList.t, Date) :: list
   def entries(todo_list, date) do
     todo_list.entries
