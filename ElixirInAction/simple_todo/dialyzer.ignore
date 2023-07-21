@@ -1,0 +1,2 @@
+lib/todo_list.ex:11: Type specification 'Elixir.TodoList':add_entry(t(),map()) -> t() is a subtype of the success typing: 'Elixir.TodoList':add_entry(#{'__struct__':='Elixir.TodoList', 'entries':=map(), 'next_id':=number(), _=>_},map()) -> #{'__struct__':='Elixir.TodoList', 'entries':=map(), 'next_id':=number(), _=>_}
+lib/todo_list.ex:24: Type specification 'Elixir.TodoList':entries(t(),'Elixir.Date') -> [any()] is a subtype of the success typing: 'Elixir.TodoList':entries(atom() | #{'entries':=map(), _=>_},_) -> [any()]
