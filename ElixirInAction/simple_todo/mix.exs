@@ -30,7 +30,7 @@ defmodule SimpleTodo.MixProject do
 
   defp dialyzer() do
     [
-      flags: [:missing_return, :extra_return, :unmatched_returns, :error_handling, :underspecs, :specdiffs, :overspecs],
+      flags: [:missing_return, :extra_return, :unmatched_returns, :error_handling],
       ignore_warnings: "dialyzer.ignore"
     ]
   end
