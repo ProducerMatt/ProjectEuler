@@ -6,10 +6,6 @@ defmodule Todo.Database do
       name: __MODULE__
     )
   end
-  def init(_) do
-    Todo.Database.start()
-    {:ok, %{}}
-  end
   def store(key, data) do
     GenServer.cast(__MODULE__, {:store, key, data})
   end

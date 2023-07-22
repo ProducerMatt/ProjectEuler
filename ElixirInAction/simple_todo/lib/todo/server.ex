@@ -4,22 +4,23 @@ defmodule Todo.Server do
   """
   use GenServer
 
-  @spec start(atom() | list()) :: pid
-  def start(entries \\ nil) do
+  @spec start() :: {:ok, pid}
+  @spec start(list()) :: {:ok, pid}
+  def start(entries \\ []) do
     result = GenServer.start(__MODULE__, entries, name: __MODULE__)
     case result do
-      {:ok, pid} -> pid
+      {:ok, pid} -> {:ok, pid}
       x -> throw("Unexpected: #{x}")
     end
   end
   @impl GenServer
-  @spec init(atom() | list()) :: {:ok, map}
+  @spec init(list()) :: {:ok, map}
   def init(entries) do
     {:ok,
      cond do
-       is_list(entries) ->
+       length(entries) > 0 ->
          Todo.List.new(entries)
-       is_nil(entries) ->
+       true ->
          Todo.List.new()
      end
     }
