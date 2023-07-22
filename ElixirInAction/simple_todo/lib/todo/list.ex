@@ -21,9 +21,19 @@ defmodule Todo.List do
       entry
     )
     %Todo.List{todo_list |
-              entries: new_entries,
-              next_id: todo_list.next_id + 1
+               entries: new_entries,
+               next_id: todo_list.next_id + 1
     }
+  end
+  @spec add_entries(Todo.List.t, [map]) :: Todo.List.t
+  def add_entries(todo_list, entries) do
+    case entries do
+      [ first | rest ] ->
+        add_entry(todo_list, first)
+        |> add_entries(rest)
+      [ ] ->
+        todo_list
+    end
   end
   @spec update_entry(Todo.List.t, integer, map) :: Todo.List.t
   def update_entry(todo_list, id, entry) do

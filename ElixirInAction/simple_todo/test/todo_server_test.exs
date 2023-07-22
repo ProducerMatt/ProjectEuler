@@ -15,14 +15,16 @@ defmodule TodoServerTest do
 
   test "Todo.Server add" do
     entries = Map.values(@example_list.entries)
-    Todo.Server.start(entries)
+    Todo.Server.start()
+    Todo.Server.add_entries(entries)
     Todo.Server.add_entry(@new_entry)
     assert Todo.Server.entries(@new_entry.date) == [@new_entry_added]
     Todo.Server.stop()
   end
   test "Todo.Server.entries" do
     entries = Map.values(@example_list.entries)
-    Todo.Server.start(entries)
+    Todo.Server.start()
+    Todo.Server.add_entries(entries)
     expected = [
       @example_list.entries[1],
       @example_list.entries[3],
@@ -32,7 +34,8 @@ defmodule TodoServerTest do
   end
   test "Todo.Server.update_entry" do
     entries = Map.values(@example_list.entries)
-    Todo.Server.start(entries)
+    Todo.Server.start()
+    Todo.Server.add_entries(entries)
     id = 1
     to_update = %{title: "Flossing"}
     Todo.Server.update_entry(id, to_update)
@@ -43,7 +46,8 @@ defmodule TodoServerTest do
   end
   test "Todo.Server.delete_entry" do
     entries = Map.values(@example_list.entries)
-    Todo.Server.start(entries)
+    Todo.Server.start()
+    Todo.Server.add_entries(entries)
     Todo.Server.delete_entry(3)
     assert Todo.Server.entries(@example_list.entries[1].date) == [@example_list.entries[1]]
     Todo.Server.stop()

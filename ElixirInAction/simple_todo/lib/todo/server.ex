@@ -42,6 +42,8 @@ defmodule Todo.Server do
     case request do
       {:add_entry, new_entry} ->
         {:noreply, Todo.List.add_entry(todo_list, new_entry)}
+      {:add_entries, new_entries} ->
+        {:noreply, Todo.List.add_entries(todo_list, new_entries)}
       {:update_entry, id, entry} ->
         {:noreply, Todo.List.update_entry(todo_list, id, entry)}
       {:delete_entry, id} ->
@@ -50,6 +52,9 @@ defmodule Todo.Server do
   end
   def add_entry(new_entry) do
     GenServer.cast(__MODULE__, {:add_entry, new_entry})
+  end
+  def add_entries(new_entries) do
+    GenServer.cast(__MODULE__, {:add_entries, new_entries})
   end
   def update_entry(id, entry) do
     GenServer.cast(__MODULE__, {:update_entry, id, entry})
