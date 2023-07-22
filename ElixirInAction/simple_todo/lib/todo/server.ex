@@ -1,4 +1,7 @@
 defmodule Todo.Server do
+  @moduledoc """
+  Todo List: state-maintaining server functions
+  """
   use GenServer
 
   @spec start(atom() | list()) :: pid
@@ -6,7 +9,7 @@ defmodule Todo.Server do
     result = GenServer.start(__MODULE__, entries, name: __MODULE__)
     case result do
       {:ok, pid} -> pid
-      x -> "Unexpected: #{x}"
+      x -> throw("Unexpected: #{x}")
     end
   end
   @impl GenServer

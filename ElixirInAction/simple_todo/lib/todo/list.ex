@@ -1,4 +1,8 @@
 defmodule Todo.List do
+  @moduledoc """
+  Todo List: pure functional implementation
+  """
+
   defstruct [next_id: 1, entries: %{}]
   @type t :: %__MODULE__{next_id: integer, entries: map}
   def new(entries \\ []) do
@@ -40,6 +44,9 @@ defmodule Todo.List do
 end
 
 defmodule Todo.List.CsvImporter do
+  @moduledoc """
+  Basic CSV importer
+  """
 
   defp file_stream(path) do
     File.stream!(path)
@@ -50,10 +57,10 @@ defmodule Todo.List.CsvImporter do
     file_stream(path)
     |> Stream.map(&String.split(&1, ","))
     |> Stream.map(fn l ->
-      [ dateString, title ] = l
-      case Date.from_iso8601(dateString) do
+      [date_string, title] = l
+      case Date.from_iso8601(date_string) do
         {:ok, date} -> %{date: date, title: title}
-        other -> throw("bad css]v: #{dateString} -> #{other}")
+        other -> throw("bad csv: #{date_string} -> #{other}")
       end
     end)
     |> Todo.List.new()
