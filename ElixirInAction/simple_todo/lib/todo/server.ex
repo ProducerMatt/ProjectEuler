@@ -56,18 +56,18 @@ defmodule Todo.Server do
     end
   end
   def add_entry(pid, new_entry) do
-    GenServer.cast(__MODULE__, {:add_entry, pid, new_entry})
+    GenServer.cast(pid, {:add_entry, new_entry})
   end
   def add_entries(pid, new_entries) do
-    GenServer.cast(__MODULE__, {:add_entries, pid, new_entries})
+    GenServer.cast(pid, {:add_entries, new_entries})
   end
   def update_entry(pid, id, entry) do
-    GenServer.cast(__MODULE__, {:update_entry, pid, id, entry})
+    GenServer.cast(pid, {:update_entry, id, entry})
   end
   def delete_entry(pid, id) do
-    GenServer.cast(__MODULE__, {:delete_entry, pid, id})
+    GenServer.cast(pid, {:delete_entry, id})
   end
   def entries(pid, date) do
-    GenServer.call(__MODULE__, {:entries, pid, date})
+    GenServer.call(pid, {:entries, date})
   end
 end
