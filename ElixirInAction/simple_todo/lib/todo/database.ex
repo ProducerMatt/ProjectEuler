@@ -16,29 +16,24 @@ defmodule Todo.Database do
   @spec init(integer) :: {:ok, [pid]}
   def init(num_workers) do
     {:ok, Enum.map(1..num_workers, fn _ ->
-        spawn(fn -> DatabaseWorker.start(@db_folder) end)
+        {:ok, pid} = DatabaseWorker.start(@db_folder)
+        pid
       end)}
   end
   defp choose_worker(key) do
     :erlang.phash2(key, @num_workers)
   end
   @impl GenServer
-  def handle_call(request, _from, workers) do
-    case request do
-      {:get, key} ->
-        wid = choose_worker(key)
-        result = DatabaseWorker.get(workers[wid], key)
-        {:reply, result, workers}
-    end
+  def handle_call({:get, key}, _from, workers) do
+    wid = workers[choose_worker(key)]
+    result = DatabaseWorker.get(wid, key)
+    {:reply, result, workers}
   end
   @impl GenServer
-  def handle_cast(request, workers) do
-    case request do
-      {:store, key, data} ->
-        wid = choose_worker(key)
-        DatabaseWorker.store(workers[wid], key, data)
-        {:noreply, workers}
-    end
+  def handle_cast({:store, key, data}, workers) do
+    wid = workers[choose_worker(key)]
+    DatabaseWorker.store(wid, key, data)
+    {:noreply, workers}
   end
 end
 defmodule Todo.DatabaseWorker do
