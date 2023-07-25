@@ -13,5 +13,6 @@ defmodule Todo.CacheTest do
     Todo.Server.add_entry(alice, %{date: ~D[2023-12-19], title: "Dentist"})
     entries = Todo.Server.entries(alice, ~D[2023-12-19])
     assert [%{date: ~D[2023-12-19], title: "Dentist"}] = entries    #1
+    Todo.Server.reset_db(alice)
   end
 end

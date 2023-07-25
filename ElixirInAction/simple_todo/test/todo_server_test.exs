@@ -20,6 +20,7 @@ defmodule TodoServerTest do
     Todo.Server.add_entries(pid, entries)
     Todo.Server.add_entry(pid, @new_entry)
     assert Todo.Server.entries(pid, @new_entry.date) == [@new_entry_added]
+    Todo.Server.reset_db(pid)
     Todo.Server.stop(pid)
   end
   test "Todo.Server.entries" do
@@ -32,6 +33,7 @@ defmodule TodoServerTest do
       @example_list.entries[3],
     ]
     assert expected == Todo.Server.entries(pid, ~D[2023-12-19])
+    Todo.Server.reset_db(pid)
     Todo.Server.stop(pid)
   end
   test "Todo.Server.update_entry" do
@@ -45,6 +47,7 @@ defmodule TodoServerTest do
     new_list = Todo.Server.entries(pid, ~D[2023-12-19])
     added_entry = Map.merge(@example_list.entries[id], to_update)
     assert List.first(new_list) == added_entry
+    Todo.Server.reset_db(pid)
     Todo.Server.stop(pid)
   end
   test "Todo.Server.delete_entry" do
@@ -54,6 +57,21 @@ defmodule TodoServerTest do
     Todo.Server.add_entries(pid, entries)
     Todo.Server.delete_entry(pid, 3)
     assert Todo.Server.entries(pid, @example_list.entries[1].date) == [@example_list.entries[1]]
+    Todo.Server.reset_db(pid)
+    Todo.Server.stop(pid)
+  end
+  test "Todo.Server.reset_db" do
+    Todo.Cache.start()
+    entries = Map.values(@example_list.entries)
+    {:ok, pid} = Todo.Server.start("test_reset_db")
+    Todo.Server.add_entries(pid, entries)
+    expected = [
+      @example_list.entries[1],
+      @example_list.entries[3],
+    ]
+    assert expected == Todo.Server.entries(pid, ~D[2023-12-19])
+    Todo.Server.reset_db(pid)
+    assert [] == Todo.Server.entries(pid, ~D[2023-12-19])
     Todo.Server.stop(pid)
   end
 end

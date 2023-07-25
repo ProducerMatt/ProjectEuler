@@ -53,6 +53,10 @@ defmodule Todo.Server do
         new_list = Todo.List.delete_entry(todo_list, id)
         Todo.Database.store(name, new_list)
         {:noreply, {name, new_list}}
+      {:reset_db} ->
+        new_list = Todo.List.new()
+        Todo.Database.store(name, new_list)
+        {:noreply, {name, new_list}}
     end
   end
   def add_entry(pid, new_entry) do
@@ -69,5 +73,8 @@ defmodule Todo.Server do
   end
   def entries(pid, date) do
     GenServer.call(pid, {:entries, date})
+  end
+  def reset_db(pid) do
+    GenServer.cast(pid, {:reset_db})
   end
 end
