@@ -22,7 +22,6 @@ defmodule Todo.Database do
         {:ok, pid} = DatabaseWorker.start(@db_folder)
         pid
       end)
-    IO.inspect(pidlist)
     {:ok, pidlist}
   end
   @spec choose_worker(String.t) :: non_neg_integer
