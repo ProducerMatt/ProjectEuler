@@ -2,10 +2,12 @@ defmodule Todo.Cache do
   @type cache_key :: String.t
   @type cache_map :: %{cache_key => pid}
 
+  @spec init(any) :: {:ok, %{}}
   def init(_) do
     _ = Todo.Database.start()
     {:ok, %{}}
   end
+  @spec start :: :ignore | {:error, any} | {:ok, pid}
   def start do
     GenServer.start(__MODULE__, nil)
   end
