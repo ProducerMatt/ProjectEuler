@@ -3,9 +3,10 @@ defmodule Todo.Database do
   use GenServer
   @db_folder "./persist"
   @num_workers 3
-  @spec start :: :ignore | {:error, any} | {:ok, pid}
-  def start() do
-    GenServer.start(__MODULE__, @num_workers, name: __MODULE__)
+
+  @spec start_link :: :ignore | {:error, any} | {:ok, pid}
+  def start_link() do
+    GenServer.start_link(__MODULE__, @num_workers, name: __MODULE__)
   end
   @spec store(String.t, any) :: :ok
   def store(key, data) do
@@ -18,8 +19,9 @@ defmodule Todo.Database do
   @impl GenServer
   @spec init(non_neg_integer) :: {:ok, [pid]}
   def init(num_workers) do
+    IO.puts("Starting to-do database.")
     pidlist = Enum.map(1..num_workers, fn _ ->
-        {:ok, pid} = DatabaseWorker.start(@db_folder)
+        {:ok, pid} = DatabaseWorker.start_link(@db_folder)
         pid
       end)
     {:ok, pidlist}
@@ -46,9 +48,10 @@ end
 defmodule Todo.DatabaseWorker do
   alias Todo.DatabaseWorker
   use GenServer
-  @spec start(String.t) :: :ignore | {:error, any} | {:ok, pid}
-  def start(folder) do
-    GenServer.start(DatabaseWorker, folder)
+
+  @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
+  def start_link(folder) do
+    GenServer.start_link(DatabaseWorker, folder)
   end
   @spec store(pid, String.t, any) :: :ok
   def store(pid, key, data) do
@@ -61,14 +64,14 @@ defmodule Todo.DatabaseWorker do
   @impl GenServer
   @spec init(String.t) :: {:ok, String.t}
   def init(folder) do
+    IO.puts("Starting to-do database worker.")
     File.mkdir_p!(folder)
     {:ok, folder}
   end
   @impl GenServer
   @spec handle_cast({:store, String.t, any}, String.t) :: {:noreply, String.t}
   def handle_cast({:store, key, data}, folder) do
-    folder
-    |> file_name(key)
+    file_name(folder, key)
     |> File.write!(:erlang.term_to_binary(data))
     {:noreply, folder}
   end

@@ -14,9 +14,9 @@ defmodule TodoServerTest do
   @new_entry_added %{date: ~D[2023-12-21], id: 4, title: "Flossing"}
 
   test "Todo.Server add" do
-    Todo.Cache.start()
+    Todo.System.start_link()
     entries = Map.values(@example_list.entries)
-    {:ok, pid} = Todo.Server.start("test_add")
+    pid = Todo.Cache.server_process("test_add")
     Todo.Server.add_entries(pid, entries)
     Todo.Server.add_entry(pid, @new_entry)
     assert Todo.Server.entries(pid, @new_entry.date) == [@new_entry_added]
@@ -24,9 +24,9 @@ defmodule TodoServerTest do
     Todo.Server.stop(pid)
   end
   test "Todo.Server.entries" do
-    Todo.Cache.start()
+    Todo.System.start_link()
     entries = Map.values(@example_list.entries)
-    {:ok, pid} = Todo.Server.start("test_entries")
+    pid = Todo.Cache.server_process("test_entries")
     Todo.Server.add_entries(pid, entries)
     expected = [
       @example_list.entries[1],
@@ -37,9 +37,9 @@ defmodule TodoServerTest do
     Todo.Server.stop(pid)
   end
   test "Todo.Server.update_entry" do
-    Todo.Cache.start()
+    Todo.System.start_link()
     entries = Map.values(@example_list.entries)
-    {:ok, pid} = Todo.Server.start("test_update_entries")
+    pid = Todo.Cache.server_process("test_update_entries")
     Todo.Server.add_entries(pid, entries)
     id = 1
     to_update = %{title: "Flossing"}
@@ -51,9 +51,9 @@ defmodule TodoServerTest do
     Todo.Server.stop(pid)
   end
   test "Todo.Server.delete_entry" do
-    Todo.Cache.start()
+    Todo.System.start_link()
     entries = Map.values(@example_list.entries)
-    {:ok, pid} = Todo.Server.start("test_delete")
+    pid = Todo.Cache.server_process("test_delete")
     Todo.Server.add_entries(pid, entries)
     Todo.Server.delete_entry(pid, 3)
     assert Todo.Server.entries(pid, @example_list.entries[1].date) == [@example_list.entries[1]]
@@ -61,9 +61,9 @@ defmodule TodoServerTest do
     Todo.Server.stop(pid)
   end
   test "Todo.Server.reset_db" do
-    Todo.Cache.start()
+    Todo.System.start_link()
     entries = Map.values(@example_list.entries)
-    {:ok, pid} = Todo.Server.start("test_reset_db")
+    pid = Todo.Cache.server_process("test_reset_db")
     Todo.Server.add_entries(pid, entries)
     expected = [
       @example_list.entries[1],

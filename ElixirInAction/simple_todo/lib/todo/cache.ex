@@ -1,19 +1,22 @@
 defmodule Todo.Cache do
+  use GenServer
   @type cache_key :: String.t
   @type cache_map :: %{cache_key => pid}
 
   @spec init(any) :: {:ok, %{}}
   def init(_) do
-    _ = Todo.Database.start()
+    IO.puts("Starting to-do cache.")
+    _ = Todo.Database.start_link()
     {:ok, %{}}
   end
-  @spec start :: :ignore | {:error, any} | {:ok, pid}
-  def start do
-    GenServer.start(__MODULE__, nil)
+  #def start_link(), do: start_link(nil)
+  @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
-  @spec server_process(atom | pid | {atom, any} | {:via, atom, any}, cache_key) :: pid
-  def server_process(cache_pid, todo_list_name) do
-    GenServer.call(cache_pid, {:server_process, todo_list_name})
+  @spec server_process(cache_key) :: pid
+  def server_process(todo_list_name) do
+    GenServer.call(__MODULE__, {:server_process, todo_list_name})
   end
   @spec handle_call({:server_process, cache_key}, any, cache_map) :: {:reply, pid, cache_map}
   def handle_call({:server_process, todo_list_name}, _, todo_servers) do
@@ -21,7 +24,7 @@ defmodule Todo.Cache do
       {:ok, todo_server} ->
         {:reply, todo_server, todo_servers}
       :error ->
-        {:ok, new_server} = Todo.Server.start(todo_list_name)
+        {:ok, new_server} = Todo.Server.start_link(todo_list_name)
         {
           :reply,
           new_server,

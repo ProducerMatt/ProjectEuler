@@ -4,9 +4,10 @@ defmodule Todo.Server do
   """
   use GenServer
 
-  @spec start(Todo.Cache.cache_key) :: {:ok, pid}
-  def start(name) do
-    result = GenServer.start(__MODULE__, name)
+  @spec start_link(Todo.Cache.cache_key) :: {:ok, pid}
+  def start_link(name) do
+    IO.puts("Starting server #{name}")
+    result = GenServer.start_link(__MODULE__, name)
     case result do
       {:ok, pid} -> {:ok, pid}
       x -> throw("Unexpected: #{x}")
