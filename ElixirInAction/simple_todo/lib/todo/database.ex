@@ -4,8 +4,8 @@ defmodule Todo.Database do
   @db_folder "./persist"
   @num_workers 3
 
-  @spec start_link :: :ignore | {:error, any} | {:ok, pid}
-  def start_link() do
+  @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
+  def start_link(_) do
     GenServer.start_link(__MODULE__, @num_workers, name: __MODULE__)
   end
   @spec store(String.t, any) :: :ok

@@ -6,7 +6,6 @@ defmodule Todo.Cache do
   @spec init(any) :: {:ok, %{}}
   def init(_) do
     IO.puts("Starting to-do cache.")
-    _ = Todo.Database.start_link()
     {:ok, %{}}
   end
   #def start_link(), do: start_link(nil)
