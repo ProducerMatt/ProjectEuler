@@ -19,7 +19,6 @@ defmodule Todo.Server do
     {:ok, {name, nil}, {:continue, :init}}
   end
   @impl GenServer
-  @spec handle_continue(:init, {Todo.Cache.cache_key, nil}) :: {:noreply, {Todo.Cache.cache_key, Todo.List.t}}
   def handle_continue(:init, {name, nil}) do
     todo_list = Todo.Database.get(name) || Todo.List.new()
     {:noreply, {name, todo_list}}

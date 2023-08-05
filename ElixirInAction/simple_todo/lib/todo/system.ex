@@ -20,6 +20,7 @@ defmodule Todo.System do
   def init(_) do
     Supervisor.init(
       [
+        Todo.ProcessRegistry,
         Todo.Cache,
         Todo.Database
       ],
@@ -27,7 +28,7 @@ defmodule Todo.System do
     )
   end
 
-  def stop do
-    Supervisor.stop(__MODULE__)
+  def stop(pid) do
+    Supervisor.stop(pid)
   end
 end
