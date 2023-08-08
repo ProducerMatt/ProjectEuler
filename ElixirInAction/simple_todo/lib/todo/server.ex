@@ -2,16 +2,15 @@ defmodule Todo.Server do
   @moduledoc """
   Todo List: state-maintaining server functions
   """
-  use GenServer
+  use GenServer, restart: :temporary
 
   @spec start_link(Todo.Cache.cache_key) :: {:ok, pid}
   def start_link(name) do
     IO.puts("Starting server #{name}")
-    result = GenServer.start_link(__MODULE__, name)
-    case result do
-      {:ok, pid} -> {:ok, pid}
-      x -> throw("Unexpected: #{x}")
-    end
+    GenServer.start_link(__MODULE__, name, name: via_tuple(name))
+  end
+  defp via_tuple(name) do
+    Todo.ProcessRegistry.via_tuple({__MODULE__, name})
   end
   @impl GenServer
   @spec init(Todo.Cache.cache_key) :: {:ok, {Todo.Cache.cache_key, nil}, {:continue, :init}}
