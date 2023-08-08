@@ -19,5 +19,18 @@ defmodule Todo.CacheTest do
       Todo.Server.reset_db(alice)
       Todo.System.stop(sys_pid)
     end
+    test "crashable cache workers" do
+      {:ok, sys_pid} = Todo.System.start_link()
+      bobs_list = Todo.Cache.server_process("Bob's list")
+      bobs_list_backup = Todo.Cache.server_process("Bob's list")
+      assert(bobs_list == bobs_list_backup)
+      alices_list = Todo.Cache.server_process("Alice's list")
+      assert(bobs_list != alices_list)
+      Process.exit(bobs_list, :kill) # crash
+      bobs_list = Todo.Cache.server_process("Bob's list")
+      assert(bobs_list != bobs_list_backup)
+      assert(alices_list == Todo.Cache.server_process("Alice's list"))
+      Todo.System.stop(sys_pid)
+    end
   end
 end
