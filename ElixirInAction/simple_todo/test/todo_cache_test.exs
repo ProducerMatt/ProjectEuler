@@ -21,15 +21,15 @@ defmodule Todo.CacheTest do
     end
     test "crashable cache workers" do
       {:ok, sys_pid} = Todo.System.start_link()
-      bobs_list = Todo.Cache.server_process("Bob's list")
-      bobs_list_backup = Todo.Cache.server_process("Bob's list")
+      bobs_list = Todo.Cache.server_process("crashing list")
+      bobs_list_backup = Todo.Cache.server_process("crashing list")
       assert(bobs_list == bobs_list_backup)
-      alices_list = Todo.Cache.server_process("Alice's list")
+      alices_list = Todo.Cache.server_process("unrelated list")
       assert(bobs_list != alices_list)
       Process.exit(bobs_list, :kill) # crash
-      bobs_list = Todo.Cache.server_process("Bob's list")
+      bobs_list = Todo.Cache.server_process("crashing list")
       assert(bobs_list != bobs_list_backup)
-      assert(alices_list == Todo.Cache.server_process("Alice's list"))
+      assert(alices_list == Todo.Cache.server_process("unrelated list"))
       Todo.System.stop(sys_pid)
     end
   end

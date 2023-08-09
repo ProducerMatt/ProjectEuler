@@ -43,12 +43,12 @@ defmodule Todo.Database do
     {:ok, pidlist}
   end
   def handle_call({:get, key}, _from, workers) do
-    wid = Enum.at(workers, choose_worker(key))
+    wid = elem(workers, choose_worker(key))
     result = DatabaseWorker.get(wid, key)
     {:reply, result, workers}
   end
   def handle_cast({:store, key, data}, workers) do
-    wid = Enum.at(workers, choose_worker(key))
+    wid = elem(workers, choose_worker(key))
     DatabaseWorker.store(wid, key, data)
     {:noreply, workers}
   end
