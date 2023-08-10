@@ -66,19 +66,29 @@ defmodule Todo.DatabaseWorker do
   @type via_tuple :: {:via, Registry, {Todo.ProcessRegistry, {Todo.DatabaseWorker, pos_integer}}}
   use GenServer
 
-  @spec wait_till_online(via_tuple, non_neg_integer) :: true
-  def wait_till_online(via_tuple, i \\ 0) do
-    # NOTE: is this GenServer functionality I missed?
-    pid = GenServer.whereis(via_tuple)
-    if pid && Process.alive?(pid) do
-      true
+  @type nn_int :: non_neg_integer
+  @spec wait_till_online(via_tuple, nn_int | {nn_int, nn_int}) :: true
+  @doc """
+    Check if the given via tuple matches a valid PID that's alive. If not,
+    recurse until it's found, or until the max_tries are reached.
+    NOTE: is this GenServer functionality I missed?
+  """
+  def wait_till_online(via_tuple, tries \\ 15) do
+    if is_integer(tries) do
+      wait_till_online(via_tuple, {tries, tries})
     else
-      {_, _, {_, {_, worker_id}}} = via_tuple
-      if (i < 5000) do
-      IO.puts("DatabaseWorker #{worker_id} not found, retrying")
-      wait_till_online(via_tuple)
+      {max_tries, i} = tries
+      pid = GenServer.whereis(via_tuple)
+      if pid && Process.alive?(pid) do
+        true
       else
-        throw("DatabaseWorker #{worker_id} couldn't be found after #{i} tries")
+        {_, _, {_, {_, worker_id}}} = via_tuple
+        if (i > 0) do
+          IO.puts("DatabaseWorker #{worker_id} not found, retrying")
+          wait_till_online(via_tuple, {max_tries, i - 1})
+        else
+          throw("DatabaseWorker #{worker_id} couldn't be found after #{max_tries} tries")
+        end
       end
     end
   end
