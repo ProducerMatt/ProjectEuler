@@ -4,7 +4,7 @@ defmodule Todo.Server do
   """
   use GenServer, restart: :temporary
 
-  @spec start_link(Todo.Cache.cache_key) :: {:ok, pid}
+  @spec start_link(Todo.Cache.cache_key) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(name) do
     IO.puts("Starting server #{name}")
     GenServer.start_link(__MODULE__, name, name: via_tuple(name))

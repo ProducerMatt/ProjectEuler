@@ -19,7 +19,7 @@ defmodule Todo.CacheTest do
       Todo.Server.reset_db(alice)
       Todo.System.stop(sys_pid)
     end
-    test "crashable cache workers" do
+    test "crashable list server workers" do
       {:ok, sys_pid} = Todo.System.start_link()
       bobs_list = Todo.Cache.server_process("crashing list")
       bobs_list_backup = Todo.Cache.server_process("crashing list")
@@ -30,6 +30,24 @@ defmodule Todo.CacheTest do
       bobs_list = Todo.Cache.server_process("crashing list")
       assert(bobs_list != bobs_list_backup)
       assert(alices_list == Todo.Cache.server_process("unrelated list"))
+      Todo.System.stop(sys_pid)
+    end
+    test "crashable database workers" do
+      {:ok, sys_pid} = Todo.System.start_link()
+      bobs_list = Todo.Cache.server_process("Bobs server")
+      bobs_list_backup = Todo.Cache.server_process("Bobs server")
+      assert(bobs_list == bobs_list_backup)
+      alices_list = Todo.Cache.server_process("Alices server")
+      assert(bobs_list != alices_list)
+      bobs_list_db_worker = Todo.Database.worker_pid("Bobs server")
+      alices_list_db_worker = Todo.Database.worker_pid("Alices server")
+      IO.puts("crashing Bob's database worker")
+      Process.exit(bobs_list_db_worker, :kill) # crash
+      #Process.sleep(100)
+      assert(bobs_list_db_worker != Todo.Database.worker_pid("Bobs server"))
+      assert(alices_list_db_worker == Todo.Database.worker_pid("Alices server"))
+      assert(bobs_list == Todo.Cache.server_process("Bobs server"))
+      assert(alices_list == Todo.Cache.server_process("Alices server"))
       Todo.System.stop(sys_pid)
     end
   end

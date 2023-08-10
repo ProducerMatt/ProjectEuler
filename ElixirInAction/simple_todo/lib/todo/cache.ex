@@ -16,6 +16,7 @@ defmodule Todo.Cache do
       strategy: :one_for_one
     )
   end
+  @spec server_process(cache_key) :: pid
   def server_process(todo_list_name) do
     case start_child(todo_list_name) do
       {:ok, pid} -> pid                    #1
@@ -35,7 +36,6 @@ defmodule Todo.Cache do
       start: {__MODULE__, :start_link, [nil]},
       type: :supervisor
     } end
-  @spec server_process(cache_key) :: pid
   @spec handle_call({:server_process, cache_key}, any, cache_map) :: {:reply, pid, cache_map}
   def handle_call({:server_process, todo_list_name}, _, todo_servers) do
     case Map.fetch(todo_servers, todo_list_name) do
