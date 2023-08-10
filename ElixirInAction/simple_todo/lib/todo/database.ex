@@ -63,8 +63,25 @@ end
 defmodule Todo.DatabaseWorker do
   @type cache_key :: Todo.Database.cache_key
   @type data :: Todo.Database.data
+  @type via_tuple :: {:via, Registry, {Todo.ProcessRegistry, {Todo.DatabaseWorker, pos_integer}}}
   use GenServer
 
+  @spec wait_till_online(via_tuple, non_neg_integer) :: true
+  def wait_till_online(via_tuple, i \\ 0) do
+    # NOTE: is this GenServer functionality I missed?
+    pid = GenServer.whereis(via_tuple)
+    if pid && Process.alive?(pid) do
+      true
+    else
+      {_, _, {_, {_, worker_id}}} = via_tuple
+      if (i < 5000) do
+      IO.puts("DatabaseWorker #{worker_id} not found, retrying")
+      wait_till_online(via_tuple)
+      else
+        throw("DatabaseWorker #{worker_id} couldn't be found after #{i} tries")
+      end
+    end
+  end
 
   @spec start_link({String.t, pos_integer}) :: :ignore | {:error, any} | {:ok, pid}
   def start_link({db_folder, worker_id}) do
@@ -75,45 +92,27 @@ defmodule Todo.DatabaseWorker do
     )
   end
 
-# {:exit,
-#  {:noproc,
-#   {GenServer, :call,
-#    [
-#      {:via, Registry, {Todo.ProcessRegistry, {Todo.DatabaseWorker, 1}}},
-#      :pid,
-#      5000
-#    ]}}}
-
   @spec store(pos_integer, cache_key, data) :: :ok
   def store(worker_id, key, data) do
-    try do # NOTE: is this the right way to handle this?
-      GenServer.cast(via_tuple(worker_id), {:store, key, data})
-    catch :exit, {:noproc, _} ->
-        IO.puts("DatabaseWorker #{worker_id} not found, retrying")
-        store(worker_id, key, data)
-     end
+    via = via_tuple(worker_id)
+    wait_till_online(via)
+    GenServer.cast(via, {:store, key, data})
   end
 
   @spec get(pos_integer, cache_key) :: data
   def get(worker_id, key) do
-    try do
-      GenServer.call(via_tuple(worker_id), {:get, key})
-    catch :exit, {:noproc, _} ->
-        IO.puts("DatabaseWorker #{worker_id} not found, retrying")
-        get(worker_id, key)
-    end
+    via = via_tuple(worker_id)
+    wait_till_online(via)
+    GenServer.call(via_tuple(worker_id), {:get, key})
   end
   @spec pid(pos_integer) :: pid
   def pid(worker_id) do
-    try do
-      GenServer.call(via_tuple(worker_id), :pid)
-    catch :exit, {:noproc, _} ->
-        IO.puts("DatabaseWorker #{worker_id} not found, retrying")
-        pid(worker_id)
-    end
+    via = via_tuple(worker_id)
+    wait_till_online(via)
+    GenServer.call(via_tuple(worker_id), :pid)
   end
 
-  @spec via_tuple(pos_integer) :: {:via, Registry, {Todo.ProcessRegistry, pos_integer}}
+  @spec via_tuple(pos_integer) :: via_tuple
   def via_tuple(worker_id) do
     Todo.ProcessRegistry.via_tuple({__MODULE__, worker_id})
   end
