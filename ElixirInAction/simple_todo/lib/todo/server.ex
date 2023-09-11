@@ -35,28 +35,20 @@ defmodule Todo.Server do
   end
   @impl GenServer
   def handle_cast(request, {name, todo_list}) do
-    case request do
+    new_list = case request do
       {:add_entry, new_entry} ->
-        new_list = Todo.List.add_entry(todo_list, new_entry)
-        Todo.Database.store(name, new_list)
-        {:noreply, {name, new_list}}
+        Todo.List.add_entry(todo_list, new_entry)
       {:add_entries, new_entries} ->
-        new_list = Todo.List.add_entries(todo_list, new_entries)
-        Todo.Database.store(name, new_list)
-        {:noreply, {name, new_list}}
+        Todo.List.add_entries(todo_list, new_entries)
       {:update_entry, id, entry} ->
-        new_list = Todo.List.update_entry(todo_list, id, entry)
-        Todo.Database.store(name, new_list)
-        {:noreply, {name, new_list}}
+        Todo.List.update_entry(todo_list, id, entry)
       {:delete_entry, id} ->
-        new_list = Todo.List.delete_entry(todo_list, id)
-        Todo.Database.store(name, new_list)
-        {:noreply, {name, new_list}}
+        Todo.List.delete_entry(todo_list, id)
       {:reset_db} ->
-        new_list = Todo.List.new()
-        Todo.Database.store(name, new_list)
-        {:noreply, {name, new_list}}
+        Todo.List.new()
     end
+    Todo.Database.store(name, new_list)
+    {:noreply, {name, new_list}}
   end
   def add_entry(pid, new_entry) do
     GenServer.cast(pid, {:add_entry, new_entry})
