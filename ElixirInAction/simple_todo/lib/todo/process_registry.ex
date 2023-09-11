@@ -1,5 +1,6 @@
 defmodule Todo.ProcessRegistry do
   @type via_tuple :: {:via, Registry, {Todo.ProcessRegistry, any}}
+
   @spec start_link :: {:error, any} | {:ok, pid}
   def start_link do
     Registry.start_link(keys: :unique, name: __MODULE__)
