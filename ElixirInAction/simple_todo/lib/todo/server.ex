@@ -9,31 +9,36 @@ defmodule Todo.Server do
     IO.puts("Starting server #{name}")
     GenServer.start_link(__MODULE__, name, name: via_tuple(name))
   end
+
   defp via_tuple(name) do
     Todo.ProcessRegistry.via_tuple({__MODULE__, name})
   end
-  @impl GenServer
+
   @spec init(Todo.Cache.cache_key) :: {:ok, {Todo.Cache.cache_key, nil}, {:continue, :init}}
+  @impl true
   def init(name) do
     {:ok, {name, nil}, {:continue, :init}}
   end
-  @impl GenServer
+
+  @impl true
   def handle_continue(:init, {name, nil}) do
     todo_list = Todo.Database.get(name) || Todo.List.new()
     {:noreply, {name, todo_list}}
   end
+
   def stop(pid) do
     GenServer.stop(pid, :normal)
   end
 
-  @impl GenServer
+  @impl true
   def handle_call(request, _from, {name, todo_list}) do
     case request do
       {:entries, date} ->
         {:reply, Todo.List.entries(todo_list, date), {name, todo_list}}
     end
   end
-  @impl GenServer
+
+  @impl true
   def handle_cast(request, {name, todo_list}) do
     new_list = case request do
       {:add_entry, new_entry} ->
@@ -50,6 +55,8 @@ defmodule Todo.Server do
     Todo.Database.store(name, new_list)
     {:noreply, {name, new_list}}
   end
+
+
   def add_entry(pid, new_entry) do
     GenServer.cast(pid, {:add_entry, new_entry})
   end

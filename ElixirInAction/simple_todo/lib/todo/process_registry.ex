@@ -17,7 +17,6 @@ defmodule Todo.ProcessRegistry do
           optional(:shutdown) => :brutal_kill | :infinity | pos_integer,
           optional(:type) => :supervisor | :worker
         }
-  @use Supervisor
   def child_spec(_) do
     Supervisor.child_spec(
       Registry,

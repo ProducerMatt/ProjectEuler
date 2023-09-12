@@ -1,5 +1,4 @@
 defmodule Todo.Cache do
-  use GenServer
   @type cache_key :: String.t
   @type cache_map :: %{cache_key => pid}
 
@@ -7,7 +6,6 @@ defmodule Todo.Cache do
   def init(_) do
     {:ok, %{}}
   end
-  #def start_link(), do: start_link(nil)
   @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(_) do
     IO.puts("Starting to-do cache.")
@@ -29,13 +27,13 @@ defmodule Todo.Cache do
       {Todo.Server, todo_list_name}
     )
   end
-  @use DynamicSupervisor
   def child_spec(_arg) do
     %{
       id: __MODULE__,
       start: {__MODULE__, :start_link, [nil]},
       type: :supervisor
-    } end
+    }
+  end
   @spec handle_call({:server_process, cache_key}, any, cache_map) :: {:reply, pid, cache_map}
   def handle_call({:server_process, todo_list_name}, _, todo_servers) do
     case Map.fetch(todo_servers, todo_list_name) do
