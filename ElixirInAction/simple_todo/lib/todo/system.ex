@@ -13,7 +13,7 @@ defmodule Todo.System do
 
   @spec start_link :: :ignore | {:error, any} | {:ok, pid}
   def start_link do
-    Supervisor.start_link(__MODULE__, nil)
+    Supervisor.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
   @impl Supervisor
@@ -28,7 +28,7 @@ defmodule Todo.System do
     )
   end
 
-  def stop(pid) do
+  def stop(pid \\ __MODULE__) do
     Supervisor.stop(pid)
   end
 end
