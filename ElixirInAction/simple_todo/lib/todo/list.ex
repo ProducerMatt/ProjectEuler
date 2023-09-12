@@ -28,10 +28,10 @@ defmodule Todo.List do
   @spec add_entries(Todo.List.t, [map]) :: Todo.List.t
   def add_entries(todo_list, entries) do
     case entries do
-      [ first | rest ] ->
+      [first | rest] ->
         add_entry(todo_list, first)
         |> add_entries(rest)
-      [ ] ->
+      [] ->
         todo_list
     end
   end
