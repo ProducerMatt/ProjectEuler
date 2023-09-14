@@ -24,3 +24,5 @@ simple_todo-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+persist/*
