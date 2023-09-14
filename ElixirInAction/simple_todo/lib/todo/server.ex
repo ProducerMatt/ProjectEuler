@@ -4,6 +4,8 @@ defmodule Todo.Server do
   """
   use GenServer, restart: :temporary
 
+  @expiry_idle_timeout :timer.seconds(10)
+
   @spec start_link(Todo.Cache.cache_key) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(name) do
     IO.puts("Starting server #{name}")
@@ -23,7 +25,7 @@ defmodule Todo.Server do
   @impl true
   def handle_continue(:init, {name, nil}) do
     todo_list = Todo.Database.get(name) || Todo.List.new()
-    {:noreply, {name, todo_list}}
+    {:noreply, {name, todo_list}, @expiry_idle_timeout}
   end
 
   def stop(pid) do
@@ -34,7 +36,12 @@ defmodule Todo.Server do
   def handle_call(request, _from, {name, todo_list}) do
     case request do
       {:entries, date} ->
-        {:reply, Todo.List.entries(todo_list, date), {name, todo_list}}
+        {
+          :reply,
+          Todo.List.entries(todo_list, date),
+          {name, todo_list},
+          @expiry_idle_timeout
+        }
     end
   end
 
@@ -59,7 +66,13 @@ defmodule Todo.Server do
       end
 
     Todo.Database.store(name, new_list)
-    {:noreply, {name, new_list}}
+    {:noreply, {name, new_list}, @expiry_idle_timeout}
+  end
+
+  @impl true
+  def handle_info(:timeout, {name, todo_list}) do
+    IO.puts("Stopping to-do server for #{name}")
+    {:stop, :normal, {name, todo_list}}     #1
   end
 
 

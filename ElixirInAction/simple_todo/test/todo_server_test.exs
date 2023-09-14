@@ -78,5 +78,13 @@ defmodule TodoServerTest do
       assert [] == Todo.Server.entries(pid, ~D[2023-12-19])
       Todo.System.stop(sys_pid)
     end
+    test "timeout" do
+      {:ok, sys_pid} = Todo.System.start_link()
+      pid = Todo.Cache.server_process("test_timeout_db")
+      assert Process.alive?(pid)
+      :timer.sleep(12000)
+      assert ! Process.alive?(pid)
+      Todo.System.stop(sys_pid)
+    end
   end
 end
