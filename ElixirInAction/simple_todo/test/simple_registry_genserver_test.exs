@@ -1,22 +1,22 @@
-defmodule SimpleRegistryTest do
+defmodule SimpleRegistryGenserverTest do
   use ExUnit.Case
-  doctest SimpleRegistry
+  doctest SimpleRegistryGenserver
 
   describe "SimpleRegistry" do
     test "clear when exits" do
-      SimpleRegistry.start_link()
+      SimpleRegistryGenserver.start_link()
       f = spawn(fn  ->
-        SimpleRegistry.register(:f)
+        SimpleRegistryGenserver.register(:f)
         receive do
           _ -> nil
         end
       end)
       Process.sleep(50)
-      assert f == SimpleRegistry.whereis(:f)
+      assert f == SimpleRegistryGenserver.whereis(:f)
       send(f, nil)
       Process.sleep(50)
       assert Process.alive?(f) == false
-      assert SimpleRegistry.whereis(:f) == nil
+      assert SimpleRegistryGenserver.whereis(:f) == nil
     end
   end
 end

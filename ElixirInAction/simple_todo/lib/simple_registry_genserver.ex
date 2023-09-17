@@ -1,4 +1,4 @@
-defmodule SimpleRegistry do
+defmodule SimpleRegistryGenserver do
   require Logger
   use GenServer
 
