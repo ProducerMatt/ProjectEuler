@@ -1,5 +1,5 @@
 defmodule SimpleTodoTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest Todo.List
 
   @doc """

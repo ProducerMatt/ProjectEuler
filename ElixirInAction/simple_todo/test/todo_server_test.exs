@@ -1,5 +1,5 @@
 defmodule TodoServerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest Todo.Server
 
   @doc """
@@ -18,17 +18,14 @@ defmodule TodoServerTest do
 
   describe "Todo.Server" do
     test "add" do
-      {:ok, sys_pid} = Todo.System.start_link()
       entries = Map.values(@example_list.entries)
       pid = Todo.Cache.server_process("test_add")
       Todo.Server.add_entries(pid, entries)
       Todo.Server.add_entry(pid, @new_entry)
       assert Todo.Server.entries(pid, @new_entry.date) == [@new_entry_added]
       Todo.Server.reset_db(pid)
-      Todo.System.stop(sys_pid)
     end
     test "entries" do
-      {:ok, sys_pid} = Todo.System.start_link()
       entries = Map.values(@example_list.entries)
       pid = Todo.Cache.server_process("test_entries")
       Todo.Server.add_entries(pid, entries)
@@ -38,10 +35,8 @@ defmodule TodoServerTest do
       ]
       assert expected == Todo.Server.entries(pid, ~D[2023-12-19])
       Todo.Server.reset_db(pid)
-      Todo.System.stop(sys_pid)
     end
     test "update_entry" do
-      {:ok, sys_pid} = Todo.System.start_link()
       entries = Map.values(@example_list.entries)
       pid = Todo.Cache.server_process("test_update_entries")
       Todo.Server.add_entries(pid, entries)
@@ -52,20 +47,16 @@ defmodule TodoServerTest do
       added_entry = Map.merge(@example_list.entries[id], to_update)
       assert List.first(new_list) == added_entry
       Todo.Server.reset_db(pid)
-      Todo.System.stop(sys_pid)
     end
     test "delete_entry" do
-      {:ok, sys_pid} = Todo.System.start_link()
       entries = Map.values(@example_list.entries)
       pid = Todo.Cache.server_process("test_delete")
       Todo.Server.add_entries(pid, entries)
       Todo.Server.delete_entry(pid, 3)
       assert Todo.Server.entries(pid, @example_list.entries[1].date) == [@example_list.entries[1]]
       Todo.Server.reset_db(pid)
-      Todo.System.stop(sys_pid)
     end
     test "reset_db" do
-      {:ok, sys_pid} = Todo.System.start_link()
       entries = Map.values(@example_list.entries)
       pid = Todo.Cache.server_process("test_reset_db")
       Todo.Server.add_entries(pid, entries)
@@ -76,15 +67,12 @@ defmodule TodoServerTest do
       assert expected == Todo.Server.entries(pid, ~D[2023-12-19])
       Todo.Server.reset_db(pid)
       assert [] == Todo.Server.entries(pid, ~D[2023-12-19])
-      Todo.System.stop(sys_pid)
     end
     test "timeout" do
-      {:ok, sys_pid} = Todo.System.start_link()
       pid = Todo.Cache.server_process("test_timeout_db")
       assert Process.alive?(pid)
       :timer.sleep(12000)
       assert ! Process.alive?(pid)
-      Todo.System.stop(sys_pid)
     end
   end
 end
