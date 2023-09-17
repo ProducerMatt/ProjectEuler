@@ -1,4 +1,5 @@
 defmodule Todo.ProcessRegistry do
+  # GenServer uses via_tuples for process routing
   @type via_tuple :: {:via, Registry, {Todo.ProcessRegistry, any}}
 
   @spec start_link :: {:error, any} | {:ok, pid}
