@@ -25,7 +25,10 @@ defmodule SimpleTodo.MixProject do
     [
       {:dialyxir, "~> 1.3.0", only: [:dev], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:poolboy, "~> 1.5"}
+      {:poolboy, "~> 1.5.2"},
+      {:cowboy, "~> 2.10"},
+      {:plug, "~> 1.14.2"},
+      {:plug_cowboy, "~> 2.6.1"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
   end
