@@ -24,7 +24,8 @@ defmodule SimpleTodo.MixProject do
   defp deps do
     [
       {:dialyxir, "~> 1.3.0", only: [:dev], runtime: false},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:poolboy, "~> 1.5"}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
   end

@@ -1,4 +1,5 @@
 defmodule Todo.Database do
+  require :poolboy
   alias Todo.DatabaseWorker
   @db_folder "./persist"
   @num_workers 3
@@ -6,57 +7,52 @@ defmodule Todo.Database do
   @type workerlist_tuple :: {pid}
   @type data :: any
 
-  @spec start_link :: {:error, any} | {:ok, pid}
-  def start_link do
-    File.mkdir_p!(@db_folder)
-    children = Enum.map(1..@num_workers, &worker_spec/1)
-    Supervisor.start_link(children, strategy: :one_for_one)
-  end
-  defp worker_spec(worker_id) do
-    default_worker_spec = {Todo.DatabaseWorker, {@db_folder, worker_id}}
-    Supervisor.child_spec(default_worker_spec, id: worker_id)
-  end
   def child_spec(_) do
-    %{
-      id: __MODULE__,
-      start: {__MODULE__, :start_link, []},
-      type: :supervisor
-    }
+    File.mkdir_p!(@db_folder)
+
+    :poolboy.child_spec(
+      __MODULE__,
+
+      [
+        name: {:local, __MODULE__},
+        worker_module: DatabaseWorker,
+        size: @num_workers,
+        max_overflow: 1
+      ],
+
+      [@db_folder]
+    )
   end
 
-  @spec store(cache_key, data) :: :ok
   def store(key, data) do
-    key
-    |> choose_worker()
-    |> Todo.DatabaseWorker.store(key, data)
+    :poolboy.transaction(
+      __MODULE__,
+      fn worker_pid ->
+        DatabaseWorker.store(worker_pid, key, data)
+      end
+    )
   end
 
-  @spec get(cache_key) :: data
   def get(key) do
-    key
-    |> choose_worker()
-    |> Todo.DatabaseWorker.get(key)
+    :poolboy.transaction(
+      __MODULE__,
+      fn worker_pid ->
+        DatabaseWorker.get(worker_pid, key)
+      end
+    )
   end
 
-  @spec choose_worker(cache_key) :: pos_integer
-  def choose_worker(key) do
-    :erlang.phash2(key, @num_workers) + 1
-  end
-
-  @spec init(pos_integer) :: {:ok, [pid]}
-  def init(num_workers) do
+  def init(_) do
     IO.puts("Starting to-do database.")
-    pidlist = Enum.map(1..num_workers, fn wid ->
-        {:ok, pid} = DatabaseWorker.start_link({@db_folder, wid})
-        pid
-      end)
-    {:ok, pidlist}
   end
 
-  @spec worker_pid(cache_key) :: pid
   def worker_pid(key) do
-    choose_worker(key)
-    |> DatabaseWorker.pid()
+    :poolboy.transaction(
+      __MODULE__,
+      fn worker_pid ->
+        DatabaseWorker.pid(worker_pid, key)
+      end
+    )
   end
 end
 
@@ -93,45 +89,31 @@ defmodule Todo.DatabaseWorker do
     end
   end
 
-  @spec start_link({String.t, pos_integer}) :: :ignore | {:error, any} | {:ok, pid}
-  def start_link({db_folder, worker_id}) do
-    GenServer.start_link(
-      __MODULE__,
-      db_folder,
-      name: via_tuple(worker_id)
-    )
+  def start_link(db_folder) do
+    GenServer.start_link(__MODULE__, db_folder)
   end
 
-  @spec store(pos_integer, cache_key, data) :: :ok
-  def store(worker_id, key, data) do
-    via = via_tuple(worker_id)
-    wait_till_online(via)
-    GenServer.cast(via, {:store, key, data})
+  def store(pid, key, data) do
+    GenServer.cast(pid, {:store, key, data})
   end
 
-  @spec get(pos_integer, cache_key) :: data
-  def get(worker_id, key) do
-    via = via_tuple(worker_id)
-    wait_till_online(via)
-    GenServer.call(via_tuple(worker_id), {:get, key})
+  def get(pid, key) do
+    GenServer.call(pid, {:get, key})
   end
-  @spec pid(pos_integer) :: pid
-  def pid(worker_id) do
-    via = via_tuple(worker_id)
-    wait_till_online(via)
-    GenServer.call(via_tuple(worker_id), :pid)
+
+  def pid(pid, key) do
+    GenServer.call(pid, {:pid, key})
   end
 
   @spec via_tuple(pos_integer) :: via_tuple
   def via_tuple(worker_id) do
     Todo.ProcessRegistry.via_tuple({__MODULE__, worker_id})
   end
-  @impl GenServer
 
+  @impl GenServer
   @spec init(String.t) :: {:ok, String.t}
   def init(folder) do
     IO.puts("Starting to-do database worker.")
-    File.mkdir_p!(folder)
     {:ok, folder}
   end
   @impl GenServer
@@ -150,7 +132,8 @@ defmodule Todo.DatabaseWorker do
            end
     {:reply, data, folder}
   end
-  def handle_call(:pid, _, folder) do
+
+  def handle_call({:pid, _}, _, folder) do
     {:reply, self(), folder}
   end
 
