@@ -1,14 +1,14 @@
 defmodule Todo.Database do
   require :poolboy
   alias Todo.DatabaseWorker
-  @db_folder "./persist"
   @num_workers 3
   @type cache_key :: Todo.Cache.cache_key
   @type workerlist_tuple :: {pid}
   @type data :: any
 
   def child_spec(_) do
-    File.mkdir_p!(@db_folder)
+    db_folder = Application.fetch_env!(:todo, :db_folder)
+    File.mkdir_p!(db_folder)
 
     :poolboy.child_spec(
       __MODULE__,
@@ -20,7 +20,7 @@ defmodule Todo.Database do
         max_overflow: 1
       ],
 
-      [@db_folder]
+      [db_folder]
     )
   end
 
