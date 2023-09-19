@@ -44,4 +44,15 @@ defmodule Todo.CacheTest do
     #  assert(alices_list == Todo.Cache.server_process("Alices server"))
     #end
   end
+
+  # HACK: This deletes all files in the db_folder, assuming it's given a unique
+  # test folder. Safer would be a list made during the testing process which
+  # then gets removed
+  ExUnit.after_suite(fn _ ->
+    dir = Application.fetch_env!(:todo, :db_folder)
+    dir
+    |> File.ls!()
+    |> Enum.map(fn i -> dir <> "/" <> i end)
+    |> Enum.each(fn i -> IO.write("Removing #{i}\n"); File.rm!(i) end)
+  end)
 end
