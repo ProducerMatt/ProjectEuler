@@ -25,6 +25,17 @@ defmodule Todo.Database do
   end
 
   def store(key, data) do
+    {_results, bad_nodes} =
+      :rpc.multicall(
+        __MODULE__,
+        :store_local,
+        [key, data],
+        :timer.seconds(5)
+      )
+    Enum.each(bad_nodes, &IO.puts("Store failed on node #{&1}"))
+    :ok
+  end
+  def store_local(key, data) do
     :poolboy.transaction(
       __MODULE__,
       fn worker_pid ->
@@ -59,35 +70,9 @@ end
 defmodule Todo.DatabaseWorker do
   @type cache_key :: Todo.Database.cache_key
   @type data :: Todo.Database.data
-  @type via_tuple :: {:via, Registry, {Todo.ProcessRegistry, {Todo.DatabaseWorker, pos_integer}}}
   use GenServer
 
   @type nn_int :: non_neg_integer
-  @spec wait_till_online(via_tuple, nn_int | {nn_int, nn_int}) :: true
-  @doc """
-    Check if the given via tuple matches a valid PID that's alive. If not,
-    recurse until it's found, or until the max_tries are reached.
-    NOTE: is this GenServer functionality I missed?
-  """
-  def wait_till_online(via_tuple, tries \\ 15) do
-    if is_integer(tries) do
-      wait_till_online(via_tuple, {tries, tries})
-    else
-      {max_tries, i} = tries
-      pid = GenServer.whereis(via_tuple)
-      if pid && Process.alive?(pid) do
-        true
-      else
-        {_, _, {_, {_, worker_id}}} = via_tuple
-        if (i > 0) do
-          IO.puts("DatabaseWorker #{worker_id} not found, retrying")
-          wait_till_online(via_tuple, {max_tries, i - 1})
-        else
-          throw("DatabaseWorker #{worker_id} couldn't be found after #{max_tries} tries")
-        end
-      end
-    end
-  end
 
   def start_link(db_folder) do
     GenServer.start_link(__MODULE__, db_folder)
@@ -103,11 +88,6 @@ defmodule Todo.DatabaseWorker do
 
   def pid(pid, key) do
     GenServer.call(pid, {:pid, key})
-  end
-
-  @spec via_tuple(pos_integer) :: via_tuple
-  def via_tuple(worker_id) do
-    Todo.ProcessRegistry.via_tuple({__MODULE__, worker_id})
   end
 
   @impl GenServer
