@@ -9,11 +9,18 @@ defmodule Todo.Server do
   @spec start_link(Todo.Cache.cache_key) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(name) do
     IO.puts("Starting server #{name}")
-    GenServer.start_link(__MODULE__, name, name: via_tuple(name))
+    GenServer.start_link(__MODULE__, name, name: global_name(name))
   end
 
-  defp via_tuple(name) do
-    Todo.ProcessRegistry.via_tuple({__MODULE__, name})
+  defp global_name(name) do
+    {:global, {__MODULE__, name}}
+  end
+
+  def whereis(name) do
+    case :global.whereis_name({__MODULE__, name}) do
+      :undefined -> nil
+      pid -> pid
+    end
   end
 
   @spec init(Todo.Cache.cache_key) :: {:ok, {Todo.Cache.cache_key, nil}, {:continue, :init}}

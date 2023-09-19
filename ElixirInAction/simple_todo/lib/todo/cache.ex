@@ -16,16 +16,21 @@ defmodule Todo.Cache do
   end
   @spec server_process(cache_key) :: pid
   def server_process(todo_list_name) do
-    case start_child(todo_list_name) do
-      {:ok, pid} -> pid                    #1
-      {:error, {:already_started, pid}} -> pid    #2
-    end
+    existing_process(todo_list_name) || new_process(todo_list_name)
   end
-  defp start_child(todo_list_name) do
-    DynamicSupervisor.start_child(
+
+  defp existing_process(todo_list_name) do
+    Todo.Server.whereis(todo_list_name)
+  end
+
+  defp new_process(todo_list_name) do
+    case DynamicSupervisor.start_child(
       __MODULE__,
       {Todo.Server, todo_list_name}
-    )
+    ) do
+      {:ok, pid} -> pid
+      {:error, {:already_started, pid}} -> pid
+    end
   end
   def child_spec(_arg) do
     %{
