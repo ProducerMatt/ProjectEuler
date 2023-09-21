@@ -12,3 +12,6 @@ db_folder =
     else: System.get_env("TODO_DB_FOLDER", "./persist") <> "_test"
 
 config :todo, db_folder: db_folder
+
+config :wobserver,
+  port: 7860
