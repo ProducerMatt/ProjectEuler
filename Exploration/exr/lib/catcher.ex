@@ -5,6 +5,10 @@ defmodule Catcher do
     GenServer.start_link(__MODULE__, nil)
   end
 
+  def catch_f(data, f, pid) do
+    GenServer.call(pid, {:catch, data, f}, :timer.seconds(3))
+  end
+
   def catch_this(data, pid) do
     GenServer.call(pid, {:catch, data}, :timer.seconds(3))
   end
@@ -25,6 +29,10 @@ defmodule Catcher do
   @impl GenServer
   def handle_call({:catch, data}, _from, {_temp, keep}) do
     {:reply, :ok, {data, keep}}
+  end
+
+  def handle_call({:catch, data, f}, _from, {_temp, keep}) do
+    {:reply, :ok, {f.(data), keep}}
   end
 
   def handle_call({:keep, new_data}, _from, {temp, keep}) do
