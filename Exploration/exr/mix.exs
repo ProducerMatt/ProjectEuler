@@ -42,7 +42,10 @@ defmodule Exr.MixProject do
 
       # Benchmarking
       {:benchee, "~> 1.1", runtime: false, only: [:dev, :test]},
-      {:benchee_html, "~> 1.0", runtime: false, only: [:dev, :test]}
+      {:benchee_html, "~> 1.0", runtime: false, only: [:dev, :test]},
+
+      # CLI monitoring
+      {:observer_cli, "~> 1.7", only: :dev}
     ]
   end
 
