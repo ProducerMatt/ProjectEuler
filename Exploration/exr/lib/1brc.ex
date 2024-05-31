@@ -1,54 +1,63 @@
 defmodule IBRC do
   def bench(filename \\ "./measurements_ex.txt") do
     %{
-      "impl_1" => &impl_1/1
+      "impl_1" => fn -> impl_1(filename) end
     }
-    |> Enum.map(fn {name, func} ->
-      {elapsed, _} =
-        :timer.tc(fn ->
-          func.(filename)
-        end)
-      IO.puts("#{name}: #{elapsed}")
-      {name, elapsed}
-    end)
+    |> Benchee.run(
+      time: 10,
+      memory_time: 3,
+      formatters: [
+        Benchee.Formatters.Console,
+      ]
+    )
   end
 
   @doc "Super basic"
   def impl_1(filename) do
-    File.stream!(filename, encoding: :unicode)
-    |> Stream.map(&String.replace_suffix(&1, "\n", ""))
-    |> Enum.reduce(%{}, fn
-      line, acc ->
-        String.split(line, ";")
-        |> then(fn
+    :timer.tc(fn ->
+      File.stream!(filename, encoding: :unicode)
+      |> Stream.map(fn item ->
+        String.replace_suffix(item, "\n", "")
+        |> String.split(";")
+        |> case do
           [name, temp_str] ->
-            temp = temp_str |> String.to_float()
-            Map.update(acc, name, default_stats(temp), fn
-              {min, {avg, count}, max} ->
-                new_count = count + 1
-                {
-                  min(min, temp),
-                  {(avg + temp) / new_count, new_count},
-                  max(max, temp)
-                }
-            end)
-        end)
+            {name, temp_str |> String.to_float()}
+        end
+      end)
+      |> Enum.reduce(%{}, fn
+        line, acc ->
+          case line do
+            {name, temp} ->
+              Map.update(acc, name, default_stats(temp), fn
+                {min, {avg, count}, max} ->
+                  new_count = count + 1
+                  {
+                    min(min, temp),
+                    {(avg + temp) / new_count, new_count},
+                    max(max, temp)
+                  }
+              end)
+          end
+      end)
+      |> Enum.flat_map(fn
+        {name, {min, {avg, _count}, max}} ->
+          [
+            name,
+            "=",
+            min |> format_float(),
+            "/",
+            avg |> format_float(),
+            "/",
+            max |> format_float(),
+            ", "
+          ]
+      end)
+      |> List.delete_at(-1)
+      |> then(&["{", &1, "}"])
+      |> IO.iodata_to_binary()
     end)
-    |> Stream.map(fn
-      {name, {min, {avg, _count}, max}} ->
-        [
-          name,
-          "=",
-          min |> format_float(),
-          "/",
-          avg |> format_float(),
-          "/",
-          max |> format_float()
-        ]
-    end)
-    |> Stream.intersperse(", ")
-    |> Enum.to_list()
-    |> IO.iodata_to_binary()
+    |> elem(0)
+    |> tap(&IO.puts("impl_1: #{&1}"))
   end
 
   def default_stats(temp), do: {temp, {temp, 1}, temp}
