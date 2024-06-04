@@ -14,6 +14,7 @@ defmodule LambdaExTest do
   test "free variables" do
     id = {:lambda, :x, :x}
     assert_value LambdaEx.fv(id) == MapSet.new([])
+    assert_value LambdaEx.fv({:lambda, :x, :y}) == MapSet.new([:y])
     assert_value LambdaEx.fv({:apply, id, :y}) == MapSet.new([:y])
     assert_value LambdaEx.fv({:apply, id, id}) == MapSet.new([])
 
