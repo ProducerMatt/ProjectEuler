@@ -12,16 +12,20 @@ defmodule LambdaEx do
 
   def eval(c, {:apply, l = {:lambda, _v, _inner}, []}), do: eval(c, l)
 
-  def eval(c, {:apply, {:lambda, vars, inner}, outers}) when is_var_list(vars) and is_expr_list(outers) do
+  def eval(c, {:apply, {:lambda, vars, inner}, outers})
+      when is_var_list(vars) and is_expr_list(outers) do
     next_c = [{v1, o1} | c]
 
     case {v2, o2} do
       {[], []} ->
         eval(next_c, inner)
+
       {[], _} ->
         raise "Applying to nothing!"
+
       {more_vars, []} ->
         eval(next_c, {:lambda, more_vars, inner})
+
       {more_vars, more_apps} ->
         eval(next_c, {:apply, {:lambda, more_vars, inner}, more_apps})
     end
