@@ -2,12 +2,11 @@
 .idea
 *.log
 tmp/
+*/.direnv
 
 *.tern-port
 node_modules/
 Thomas2018-CSSIn44Minutes/root/node_modules/
-King-CAModernApproach/o/*
-King-CAModernApproach/.ccls-cache
 */.ccls-cache
 King
 npm-debug.log*

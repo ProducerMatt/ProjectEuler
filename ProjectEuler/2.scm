@@ -11,4 +11,6 @@
                  (+ x y)
                  x
                  sum))))
-  (iter 2 2 1 2))
+  (iter 2 2 1 0))
+
+(display (solution 4000000))
