@@ -26,3 +26,6 @@ simple_todo-*.tar
 /tmp/
 
 persist/*
+
+/.nix-mix
+/.nix-hex
